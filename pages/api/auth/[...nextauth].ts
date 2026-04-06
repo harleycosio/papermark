@@ -314,6 +314,15 @@ const getAuthOptions = (req: NextApiRequest): NextAuthOptions => {
           return false;
         }
 
+        // ─── Authorized Emails Whitelist (Self-Hosting Security) ───
+        const authorizedEmails = process.env.AUTHORIZED_EMAILS?.split(",").map(e => e.trim().toLowerCase());
+        if (authorizedEmails && authorizedEmails.length > 0) {
+          if (!authorizedEmails.includes(user.email.toLowerCase())) {
+             console.warn(`[Auth] Blocked unauthorized sign-in attempt from: ${user.email}`);
+             return false; // Deny access
+          }
+        }
+
         // ─── SSO Enforcement ───
         // If user is NOT signing in via SAML, check if their domain requires SSO
         if (
