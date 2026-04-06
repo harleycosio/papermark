@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 // @ts-ignore
-import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
+import { handleUpload } from "@vercel/blob";
+// @ts-ignore
+import { type HandleUploadBody } from "@vercel/blob/client";
 import { getServerSession } from "next-auth/next";
 
 import prisma from "@/lib/prisma";
@@ -14,49 +16,23 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const body = req.body as HandleUploadBody;
+  console.log("[Upload API] Recebido request en browser-upload", body);
 
   try {
     const jsonResponse = await handleUpload({
       body,
       request: req,
       onBeforeGenerateToken: async (pathname: string) => {
-        // Generate a client token for the browser to upload the file
+        console.log(`[Upload API] request pathname: ${pathname}`);
+        
         const session = await getServerSession(req, res, authOptions);
         if (!session) {
-          console.error("[Upload] Unauthorized: No session found");
-          res.status(401).end("Unauthorized");
-          throw new Error("Unauthorized");
+          console.error("[Upload API] Unauthorized: No session found");
+          throw new Error("Unauthorized: No session");
         }
 
         const userId = (session.user as CustomUser).id;
-        const team = await prisma.team.findFirst({
-          where: {
-            users: {
-              some: {
-                userId,
-              },
-            },
-          },
-          select: {
-            plan: true,
-          },
-        });
-
-        // Default to premium limits since we are forcing high tier for self-hosted admin
-        let maxSize = 100 * 1024 * 1024; // 100 MB default for forced premium
-
-        if (team) {
-          const stripedTeamPlan = team.plan.replace("+old", "");
-          console.log(`[Upload] Team found with plan: ${stripedTeamPlan}`);
-          if (
-            !["business", "datarooms", "datarooms-plus", "datarooms-premium"].includes(stripedTeamPlan)
-          ) {
-             // If for some reason it's a legacy or lower plan, we still allow 100MB in this self-hosted context
-             console.log("[Upload] Using forced premium limits");
-          }
-        } else {
-          console.warn(`[Upload] No team found for user ${userId}. Defaulting to premium limits.`);
-        }
+        console.log(`[Upload API] generating token for user: ${userId}`);
 
         return {
           addRandomSuffix: true,
@@ -65,30 +41,19 @@ export default async function handler(
             "application/vnd.ms-excel",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           ],
-          maximumSizeInBytes: maxSize,
-          metadata: JSON.stringify({
-            userId: userId,
-          }),
+          maximumSizeInBytes: 104857600, // 100 MB force
+          metadata: JSON.stringify({ userId }),
         };
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
-        // Get notified of browser upload completion
-        // ⚠️ This will not work on `localhost` websites,
-        // Use ngrok or similar to get the full upload flow
-
-        try {
-          // Run any logic after the file upload completed
-          // const { userId } = JSON.parse(tokenPayload);
-          // await db.update({ avatar: blob.url, userId });
-        } catch (error) {
-          // throw new Error("Could not update user");
-        }
+        console.log("[Upload API] blob upload completed", blob.url);
       },
     });
 
+    console.log("[Upload API] token succesfully generated.");
     return res.status(200).json(jsonResponse);
   } catch (error) {
-    // The webhook will retry 5 times waiting for a 200
+    console.error(`[Upload API] Exception caught:`, error);
     return res.status(400).json({ error: (error as Error).message });
   }
 }

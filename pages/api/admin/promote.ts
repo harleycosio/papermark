@@ -50,7 +50,7 @@ export default async function handler(
     });
 
     // Redirigimos al dashboard con éxito
-    return res.redirect("/?promoted=true");
+    return res.redirect("/dashboard?promoted=true");
   } catch (error) {
     console.error("Error al promover usuario:", error);
     return res.status(500).send("Error interno al intentar elevar el rango.");
