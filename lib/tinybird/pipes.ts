@@ -11,16 +11,18 @@ const realTb = process.env.TINYBIRD_TOKEN
 /**
  * Fallback to a proxy if tinybird is not initialized to avoid build errors.
  */
-const tb = new Proxy({} as any, {
+const tb = new Proxy({} as Tinybird, {
   get: (target, prop) => {
     if (realTb) {
       return (realTb as any)[prop];
     }
-    return () => ({
+    // Tinybird buildPipe/buildIngestEndpoint are factories that return an async function
+    return () => async () => ({
       data: [],
+      rows: 0,
     });
   },
-}) as any;
+}) as Tinybird;
 
 export const getTotalAvgPageDuration = tb.buildPipe({
   pipe: "get_total_average_page_duration__v5",

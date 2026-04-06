@@ -11,18 +11,20 @@ const realTb = process.env.TINYBIRD_TOKEN
 /**
  * Fallback to a proxy if tinybird is not initialized to avoid build errors.
  */
-const tb = new Proxy({} as any, {
+const tb = new Proxy({} as Tinybird, {
   get: (target, prop) => {
     if (realTb) {
       return (realTb as any)[prop];
     }
-    return () => ({
+    // Tinybird buildPipe/buildIngestEndpoint are factories that return an async function
+    return () => async () => ({
+      data: [],
+      rows: 0,
       publish: async () => ({ ok: true }),
       subscribe: async () => ({ data: [] }),
-      // Mock other common methods if necessary
     });
   },
-}) as any;
+}) as Tinybird;
 
 export const publishPageView = tb.buildIngestEndpoint({
   datasource: "page_views__v3",
