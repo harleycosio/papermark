@@ -15,12 +15,19 @@ export function useIsAdmin() {
   const sessionLoading = status === "loading";
   const loading = teamLoading || sessionLoading;
 
-  const userId = (session?.user as CustomUser)?.id;
+  const user = session?.user as CustomUser;
+  const userId = user?.id;
+  const userEmail = user?.email;
 
-  const isAdmin = !loading &&
+  const AUTHORIZED_EMAILS = process.env.NEXT_PUBLIC_AUTHORIZED_EMAILS || "";
+  const isAuthorizedAdmin = userEmail && AUTHORIZED_EMAILS.split(",").includes(userEmail);
+
+  const isAdmin = !loading && (
+    isAuthorizedAdmin ||
     !!team?.users?.some(
       (u) => u.userId === userId && u.role === "ADMIN",
-    );
+    )
+  );
 
   return { isAdmin, loading };
 }
