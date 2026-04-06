@@ -42,7 +42,7 @@ export default async function handler(
           metadata: JSON.stringify({ userId }),
         };
       },
-      onUploadCompleted: async ({ blob, tokenPayload }: { blob: any, tokenPayload: any }) => {
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
         console.log("[Upload API] blob upload completed", blob.url);
       },
     });
