@@ -15,13 +15,17 @@ export default async function handler(
   }
 
   const user = session.user as CustomUser;
-  const userEmail = user.email;
-  const AUTHORIZED_EMAILS = process.env.NEXT_PUBLIC_AUTHORIZED_EMAILS || "";
+  const userEmail = user.email?.toLowerCase().trim();
   
-  const isAuthorized = userEmail && AUTHORIZED_EMAILS.split(",").includes(userEmail);
+  // Revisamos ambos nombres posibles de la variable para mayor seguridad
+  const AUTHORIZED_EMAILS_RAW = process.env.AUTHORIZED_EMAILS || process.env.NEXT_PUBLIC_AUTHORIZED_EMAILS || "";
+  const authorizedList = AUTHORIZED_EMAILS_RAW.split(",").map(e => e.trim().toLowerCase());
+  
+  const isAuthorized = userEmail && authorizedList.includes(userEmail);
 
   if (!isAuthorized) {
-    return res.status(403).send("Tu correo no está en la lista blanca de AUTHORIZED_EMAILS.");
+    console.log(`[Admin] Acceso denegado para: ${userEmail}. Lista permitida:`, authorizedList);
+    return res.status(403).send(`Tu correo (${userEmail}) no coincide con los autorizados en Vercel.`);
   }
 
   try {
