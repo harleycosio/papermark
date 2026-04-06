@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { handleUpload } from "@vercel/blob";
-import { type HandleUploadBody } from "@vercel/blob/client";
+// @ts-ignore
+import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { getServerSession } from "next-auth/next";
 
 import prisma from "@/lib/prisma";
