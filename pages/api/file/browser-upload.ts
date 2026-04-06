@@ -15,6 +15,11 @@ export default async function handler(
   const body = req.body as HandleUploadBody;
   console.log("[Upload API] Recebido request en browser-upload", body);
 
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error("[Upload API] CRITICAL ERROR: BLOB_READ_WRITE_TOKEN is not defined in environment variables.");
+    return res.status(400).json({ error: "Missing Vercel Blob configuration on the server. Please connect Blob Storage." });
+  }
+
   try {
     const jsonResponse = await handleUpload({
       body,
@@ -33,11 +38,6 @@ export default async function handler(
 
         return {
           addRandomSuffix: true,
-          allowedContentTypes: [
-            "application/pdf",
-            "application/vnd.ms-excel",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          ],
           maximumSizeInBytes: 104857600, // 100 MB force
           metadata: JSON.stringify({ userId }),
         };
