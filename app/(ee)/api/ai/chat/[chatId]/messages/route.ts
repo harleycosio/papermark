@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 
 import { generateChatTitle } from "@/ee/features/ai/lib/chat/generate-chat-title";
