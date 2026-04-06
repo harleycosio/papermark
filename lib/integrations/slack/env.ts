@@ -24,7 +24,12 @@ export const getSlackEnv = () => {
         "Slack app environment variables are not configured properly. Slack features will be disabled.",
       );
     }
-    return {} as SlackEnv;
+    return {
+      SLACK_APP_INSTALL_URL: "",
+      SLACK_CLIENT_ID: "",
+      SLACK_CLIENT_SECRET: "",
+      SLACK_INTEGRATION_ID: "slack",
+    } as SlackEnv;
   }
 
   env = parsed.data;
