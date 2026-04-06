@@ -24,13 +24,14 @@ const hanko = new Proxy({} as any, {
     if (hankoInstance) {
       return (hankoInstance as any)[prop];
     }
-    return () => {
+    // Return a generic function that accepts any arguments and types
+    return (...args: any[]) => {
       if (process.env.NODE_ENV === "production" && !process.env.CI) {
         console.warn(`Hanko.${String(prop)} called but Hanko is not configured.`);
       }
       return null;
     };
   },
-});
+}) as any;
 
 export default hanko;

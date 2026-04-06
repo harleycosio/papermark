@@ -17,15 +17,15 @@ export const redis = new Proxy({} as any, {
     if (realRedis) {
       return (realRedis as any)[prop];
     }
-    // Return a no-op function for any redis method call
-    return () => {
+    // Use an any-cast function to allow generic type arguments (e.g. .get<T>)
+    return ((...args: any[]) => {
       if (process.env.NODE_ENV === "production" && !process.env.CI) {
         console.warn(`Redis.${String(prop)} called but Redis is not configured.`);
       }
       return null;
-    };
+    }) as any;
   },
-});
+}) as unknown as Redis;
 
 const realLockerRedis =
   process.env.UPSTASH_REDIS_REST_LOCKER_URL &&
@@ -41,9 +41,9 @@ export const lockerRedisClient = new Proxy({} as any, {
     if (realLockerRedis) {
       return (realLockerRedis as any)[prop];
     }
-    return () => null;
+    return ((...args: any[]) => null) as any;
   },
-});
+}) as unknown as Redis;
 
 // Create a new ratelimiter, that allows 10 requests per 10 seconds by default
 export const ratelimit = (
