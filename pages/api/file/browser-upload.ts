@@ -38,13 +38,10 @@ export default async function handler(
 
         return {
           addRandomSuffix: true,
-          maximumSizeInBytes: 104857600, // 100 MB force
+          maximumSizeInBytes: 47185920, // 45 MB force to fit Hobby Plan limits
           metadata: JSON.stringify({ userId }),
         };
-      },
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
-        console.log("[Upload API] blob upload completed", blob.url);
-      },
+      }
     });
 
     console.log("[Upload API] token succesfully generated.");
