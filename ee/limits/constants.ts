@@ -15,15 +15,20 @@ export type TPlanLimits = {
 };
 
 export const FREE_PLAN_LIMITS = {
-  users: 1,
-  links: 50,
-  documents: 50,
-  domains: 0,
-  datarooms: 0,
-  customDomainOnPro: false,
-  customDomainInDataroom: false,
+  users: 10,
+  links: null,
+  documents: null,
+  domains: 1000,
+  datarooms: 1000,
+  customDomainOnPro: true,
+  customDomainInDataroom: true,
+  conversationsInDataroom: true,
   advancedLinkControlsOnPro: false,
-  linkCustomFields: 0,
+  linkCustomFields: 5,
+  fileSizeLimits: {
+    maxFiles: 5000,
+    maxPages: 1000,
+  },
 };
 
 export const PRO_PLAN_LIMITS = {

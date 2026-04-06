@@ -93,7 +93,7 @@ export default async function handle(
       const isPaused = isTeamPaused(team);
 
       return res.status(200).json({
-        plan: team.plan,
+        plan: "datarooms-premium", // Forced premium plan for all teams
         startsAt: team.startsAt,
         endsAt: team.endsAt,
         isCustomer,

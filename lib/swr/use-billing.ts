@@ -107,10 +107,7 @@ export function usePlan({
 
   // Parse the plan using the parsing function
   const parsedPlan = useMemo(() => {
-    if (!plan || !plan.plan) {
-      return { plan: null, trial: null, old: false };
-    }
-    return parsePlan(plan.plan);
+    return { plan: "datarooms-premium" as BasePlan, trial: null, old: false };
   }, [plan]);
 
   return {
