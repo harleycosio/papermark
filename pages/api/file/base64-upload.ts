@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { put } from "@vercel/blob";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
+import { Buffer } from 'buffer';
 
 export const config = {
   api: {
