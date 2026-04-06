@@ -20,9 +20,9 @@ export default async function handler(
       request: req,
       onBeforeGenerateToken: async (pathname: string) => {
         // Generate a client token for the browser to upload the file
-
         const session = await getServerSession(req, res, authOptions);
         if (!session) {
+          console.error("[Upload] Unauthorized: No session found");
           res.status(401).end("Unauthorized");
           throw new Error("Unauthorized");
         }
@@ -41,13 +41,20 @@ export default async function handler(
           },
         });
 
-        let maxSize = 30 * 1024 * 1024; // 30 MB
-        const stripedTeamPlan = team?.plan.replace("+old", "");
-        if (
-          stripedTeamPlan &&
-          ["business", "datarooms", "datarooms-plus", "datarooms-premium"].includes(stripedTeamPlan)
-        ) {
-          maxSize = 100 * 1024 * 1024; // 100 MB
+        // Default to premium limits since we are forcing high tier for self-hosted admin
+        let maxSize = 100 * 1024 * 1024; // 100 MB default for forced premium
+
+        if (team) {
+          const stripedTeamPlan = team.plan.replace("+old", "");
+          console.log(`[Upload] Team found with plan: ${stripedTeamPlan}`);
+          if (
+            !["business", "datarooms", "datarooms-plus", "datarooms-premium"].includes(stripedTeamPlan)
+          ) {
+             // If for some reason it's a legacy or lower plan, we still allow 100MB in this self-hosted context
+             console.log("[Upload] Using forced premium limits");
+          }
+        } else {
+          console.warn(`[Upload] No team found for user ${userId}. Defaulting to premium limits.`);
         }
 
         return {
@@ -57,10 +64,9 @@ export default async function handler(
             "application/vnd.ms-excel",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           ],
-          maximumSizeInBytes: maxSize, // 30 MB
+          maximumSizeInBytes: maxSize,
           metadata: JSON.stringify({
-            // optional, sent to your server on upload completion
-            userId: (session.user as CustomUser).id,
+            userId: userId,
           }),
         };
       },
