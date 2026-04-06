@@ -186,8 +186,10 @@ export default async function handle(
           );
 
           avgCompletionRate =
-            completionRates.reduce((sum, rate) => sum + rate, 0) /
-            completionRates.length;
+            completionRates.length > 0
+              ? completionRates.reduce((sum, rate) => sum + rate, 0) /
+                completionRates.length
+              : 0;
         } else {
           // For document type, calculate based on pages viewed
           const completionStats = await getViewCompletionStats({
@@ -219,8 +221,10 @@ export default async function handle(
           });
 
           avgCompletionRate =
-            completionRates.reduce((sum, rate) => sum + rate, 0) /
-            completionRates.length;
+            filteredViews.length > 0
+              ? completionRates.reduce((sum, rate) => sum + rate, 0) /
+                completionRates.length
+              : 0;
         }
       }
 
@@ -228,8 +232,9 @@ export default async function handle(
         views: filteredViews,
         duration,
         total_duration:
-          (totalDocumentDuration.data[0].sum_duration * 1.0) /
-          filteredViews.length,
+          totalDocumentDuration?.data?.[0]?.sum_duration
+            ? (totalDocumentDuration.data[0].sum_duration * 1.0) / filteredViews.length
+            : 0,
         avgCompletionRate: Math.round(avgCompletionRate),
         totalViews: filteredViews.length,
       };

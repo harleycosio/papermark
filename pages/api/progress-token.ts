@@ -22,7 +22,8 @@ export default async function handle(
     );
     return res.status(200).json({ publicAccessToken });
   } catch (error) {
-    console.error("Error generating token:", error);
-    return res.status(500).json({ error: "Failed to generate token" });
+    console.error("Error generating trigger token (check TRIGGER_SECRET_KEY):", error);
+    // Return null instead of 500 to prevent dashboard crash in self-hosted
+    return res.status(200).json({ publicAccessToken: null });
   }
 }

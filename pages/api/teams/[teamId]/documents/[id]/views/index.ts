@@ -107,7 +107,15 @@ async function getVideoViews(
     };
   });
 
-  const durations = await Promise.all(durationsPromises);
+  const durations = await Promise.all(durationsPromises).catch((err) => {
+    console.error("Tinybird getVideoViews error:", err);
+    return views.map(() => ({
+      data: [],
+      totalWatchTime: 0,
+      uniqueWatchTime: 0,
+      videoLength: document.versions[0]?.length || 0,
+    }));
+  });
 
   return views.map((view, index) => {
     const relevantDocumentVersion = document.versions.find(
@@ -140,7 +148,10 @@ async function getDocumentViews(views: ViewWithExtras[], document: Document) {
     });
   });
 
-  const durations = await Promise.all(durationsPromises);
+  const durations = await Promise.all(durationsPromises).catch((err) => {
+    console.error("Tinybird getDocumentViews error:", err);
+    return views.map(() => ({ data: [], rows: 0 }));
+  });
 
   return views.map((view, index) => {
     const relevantDocumentVersion = document.versions.find(
