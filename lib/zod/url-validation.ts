@@ -104,9 +104,9 @@ const createFilePathValidator = () => {
             const isValidNotionDomain = validNotionDomains.includes(hostname);
 
             // Check for vercel blob storage
-            let isVercelBlob = false;
+            let isVercelBlob = hostname.includes("blob.vercel-storage.com") || hostname.includes("vercel-storage.com");
             if (process.env.VERCEL_BLOB_HOST) {
-              isVercelBlob = hostname.startsWith(process.env.VERCEL_BLOB_HOST);
+              isVercelBlob = isVercelBlob || hostname.startsWith(process.env.VERCEL_BLOB_HOST);
             }
 
             // If it's not a standard Notion domain or Vercel blob, check if it's a custom Notion domain
@@ -373,6 +373,9 @@ export const documentUploadSchema = z
 
             // Check if it's a custom Notion domain
             try {
+              if (hostname.includes("blob.vercel-storage.com") || hostname.includes("vercel-storage.com")) {
+                return true;
+              }
               return await isCustomNotionDomain(data.url);
             } catch {
               return false;
