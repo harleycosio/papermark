@@ -19,9 +19,12 @@ export const getSlackEnv = () => {
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    throw new Error(
-      "Slack app environment variables are not configured properly.",
-    );
+    if (process.env.NODE_ENV === "production" && !process.env.CI) {
+      console.warn(
+        "Slack app environment variables are not configured properly. Slack features will be disabled.",
+      );
+    }
+    return {} as SlackEnv;
   }
 
   env = parsed.data;

@@ -1,8 +1,22 @@
 import { Dub } from "dub";
 
-export const dub = new Dub({
-  token: process.env.DUB_API_KEY,
-});
+const realDub = process.env.DUB_API_KEY
+  ? new Dub({
+      token: process.env.DUB_API_KEY,
+    })
+  : null;
+
+/**
+ * Fallback to a proxy if dub is not initialized to avoid build errors.
+ */
+export const dub = new Proxy({} as any, {
+  get: (target, prop) => {
+    if (realDub) {
+      return (realDub as any)[prop];
+    }
+    return () => null;
+  },
+}) as any;
 
 export async function getDubDiscountForExternalUserId(externalId: string) {
   try {

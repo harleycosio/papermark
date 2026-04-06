@@ -4,7 +4,23 @@ import { z } from "zod";
 import { VIDEO_EVENT_TYPES } from "../constants";
 import { WEBHOOK_TRIGGERS } from "../webhook/constants";
 
-const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! });
+const realTb = process.env.TINYBIRD_TOKEN
+  ? new Tinybird({ token: process.env.TINYBIRD_TOKEN })
+  : null;
+
+/**
+ * Fallback to a proxy if tinybird is not initialized to avoid build errors.
+ */
+const tb = new Proxy({} as any, {
+  get: (target, prop) => {
+    if (realTb) {
+      return (realTb as any)[prop];
+    }
+    return () => ({
+      data: [],
+    });
+  },
+}) as any;
 
 export const getTotalAvgPageDuration = tb.buildPipe({
   pipe: "get_total_average_page_duration__v5",
