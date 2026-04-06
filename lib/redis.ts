@@ -1,15 +1,22 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-export const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL as string,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
-});
+export const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
 
-export const lockerRedisClient = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_LOCKER_URL as string,
-  token: process.env.UPSTASH_REDIS_REST_LOCKER_TOKEN as string,
-});
+export const lockerRedisClient =
+  process.env.UPSTASH_REDIS_REST_LOCKER_URL &&
+  process.env.UPSTASH_REDIS_REST_LOCKER_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_LOCKER_URL,
+        token: process.env.UPSTASH_REDIS_REST_LOCKER_TOKEN,
+      })
+    : null;
 
 // Create a new ratelimiter, that allows 10 requests per 10 seconds by default
 export const ratelimit = (
