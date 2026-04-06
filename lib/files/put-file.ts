@@ -60,24 +60,56 @@ export const putFile = async ({
 };
 
 const putFileInVercel = async (file: File) => {
-  const newBlob = await upload(file.name, file, {
-    access: "public",
-    handleUploadUrl: "/api/file/browser-upload",
+  return new Promise<{
+    type: DocumentStorageType | null;
+    data: string | null;
+    numPages: number | undefined;
+    fileSize: number | undefined;
+  }>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      try {
+        const base64 = (reader.result as string).split(',')[1];
+        
+        const response = await fetch("/api/file/base64-upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type,
+            content: base64,
+          }),
+        });
+
+        if (!response.ok) {
+          const e = await response.text();
+          throw new Error(e);
+        }
+
+        const newBlob = await response.json();
+
+        let numPages: number = 1;
+        // get page count for pdf files
+        if (file.type === "application/pdf") {
+          const body = await file.arrayBuffer();
+          numPages = await getPagesCount(body);
+        }
+
+        resolve({
+          type: DocumentStorageType.VERCEL_BLOB,
+          data: newBlob.url,
+          numPages: numPages,
+          fileSize: file.size,
+        });
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = (error) => reject(error);
   });
-
-  let numPages: number = 1;
-  // get page count for pdf files
-  if (file.type === "application/pdf") {
-    const body = await file.arrayBuffer();
-    numPages = await getPagesCount(body);
-  }
-
-  return {
-    type: DocumentStorageType.VERCEL_BLOB,
-    data: newBlob.url,
-    numPages: numPages,
-    fileSize: file.size,
-  };
 };
 
 // Multipart upload threshold: 10MB
