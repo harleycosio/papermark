@@ -322,7 +322,7 @@ export async function POST(request: NextRequest) {
       if (globalBlockCheck.isBlocked) {
         waitUntil(reportDeniedAccessAttempt(link, email, "global"));
 
-        return NextResponse.json({ message: "Access denied" }, { status: 403 });
+        return NextResponse.json({ message: "Access denied (global blocklist)" }, { status: 403 });
       }
 
       // Build combined allow list from individual emails + visitor groups
@@ -345,7 +345,7 @@ export async function POST(request: NextRequest) {
           waitUntil(reportDeniedAccessAttempt(link, email, "allow"));
 
           return NextResponse.json(
-            { message: "Unauthorized access" },
+            { message: "Unauthorized access (allowList)" },
             { status: 403 },
           );
         }
@@ -364,7 +364,7 @@ export async function POST(request: NextRequest) {
           waitUntil(reportDeniedAccessAttempt(link, email, "deny"));
 
           return NextResponse.json(
-            { message: "Unauthorized access" },
+            { message: "Unauthorized access (denyList)" },
             { status: 403 },
           );
         }
@@ -407,7 +407,7 @@ export async function POST(request: NextRequest) {
           if (!isMember && !hasDomainAccess) {
             waitUntil(reportDeniedAccessAttempt(link, email, "allow"));
             return NextResponse.json(
-              { message: "Unauthorized access" },
+              { message: "Unauthorized access (not in group)" },
               { status: 403 },
             );
           }
