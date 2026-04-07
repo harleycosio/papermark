@@ -17,11 +17,57 @@ import { log } from "@/lib/utils";
 
 import { getPlanFromPriceId } from "../utils";
 
+async function handlePaywallPurchase(checkoutSession: Stripe.Checkout.Session) {
+  const linkId = checkoutSession.metadata?.linkId;
+  const customerEmail = checkoutSession.customer_details?.email?.toLowerCase().trim();
+
+  if (!linkId || !customerEmail) {
+    await log({
+      message: "Missing linkId or customerEmail in Paywall checkout session",
+      type: "error",
+    });
+    return;
+  }
+
+  const link = await prisma.link.findUnique({
+    where: { id: linkId },
+  });
+
+  if (!link) {
+    await log({
+      message: `Link ID ${linkId} not found in Paywall checkout session`,
+      type: "error",
+    });
+    return;
+  }
+
+  const currentAllowList = link.allowList || [];
+  if (!currentAllowList.includes(customerEmail)) {
+    await prisma.link.update({
+      where: { id: linkId },
+      data: {
+        allowList: {
+          push: customerEmail,
+        },
+      },
+    });
+    await log({
+      message: `Paywall successful: Granted access to ${customerEmail} for link ${linkId}`,
+      type: "info",
+    });
+  }
+}
+
 export async function checkoutSessionCompleted(
   event: Stripe.Event,
   isOldAccount: boolean = false,
 ) {
   const checkoutSession = event.data.object as Stripe.Checkout.Session;
+
+  // Check if this is a Paywall purchase for a Papermark Link
+  if (checkoutSession.metadata?.linkId && checkoutSession.customer_details?.email) {
+    return await handlePaywallPurchase(checkoutSession);
+  }
 
   if (
     checkoutSession.client_reference_id === null ||
