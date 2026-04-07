@@ -5,7 +5,7 @@ import { VIDEO_EVENT_TYPES } from "../constants";
 import { WEBHOOK_TRIGGERS } from "../webhook/constants";
 
 const realTb = process.env.TINYBIRD_TOKEN
-  ? new Tinybird({ token: process.env.TINYBIRD_TOKEN })
+  ? new Tinybird({ token: process.env.TINYBIRD_TOKEN, baseUrl: process.env.TINYBIRD_URL })
   : null;
 
 /**

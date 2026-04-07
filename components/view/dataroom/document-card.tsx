@@ -86,13 +86,8 @@ export default function DocumentCard({
         }`;
 
   const handleDocumentClick = (e: React.MouseEvent) => {
-    if (isProcessing) {
-      e.preventDefault();
-      toast.error(
-        "Document is still processing. Please wait a moment and try again.",
-      );
-      return;
-    }
+    // We purposefully allow clicking even if isProcessing is true, 
+    // letting standard PDF fallback handling to render the raw file natively.
   };
 
   const downloadDocument = async () => {
