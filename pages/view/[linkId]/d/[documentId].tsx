@@ -133,7 +133,7 @@ export default function DataroomDocumentViewPage({
     );
   }
 
-  const {
+  let {
     expiresAt,
     emailProtected,
     emailAuthenticated,
@@ -141,6 +141,15 @@ export default function DataroomDocumentViewPage({
     enableAgreement,
     isArchived,
   } = link;
+
+  emailProtected =
+    emailProtected ||
+    link.audienceType === "GROUP" ||
+    (link.allowList && link.allowList.some((e: string) => e && e.trim().length > 0)) ||
+    (link.denyList && link.denyList.some((e: string) => e && e.trim().length > 0)) ||
+    (("visitorGroups" in link) && (link.visitorGroups as any)?.length > 0);
+
+  const processedLink = { ...link, emailProtected } as any;
 
   const { email: userEmail, id: userId } = (session?.user as CustomUser) || {};
 
@@ -172,7 +181,7 @@ export default function DataroomDocumentViewPage({
         url={meta.metaUrl ?? ""}
       />
       <DataroomDocumentView
-        link={link}
+        link={processedLink}
         userEmail={verifiedEmail ?? storedEmail ?? userEmail}
         userId={userId}
         isProtected={!!(emailProtected || linkPassword || enableAgreement)}

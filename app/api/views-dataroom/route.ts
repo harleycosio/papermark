@@ -331,7 +331,7 @@ export async function POST(request: NextRequest) {
       const combinedAllowList = [
         ...(link.allowList || []),
         ...visitorGroupEmails,
-      ];
+      ].filter((entry) => entry && entry.trim().length > 0);
 
       // Check if email is allowed to visit the link
       if (combinedAllowList.length > 0) {
@@ -352,9 +352,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if email is denied to visit the link
-      if (link.denyList && link.denyList.length > 0) {
+      const effectiveDenyList = (link.denyList || []).filter((entry: string) => entry && entry.trim().length > 0);
+      if (effectiveDenyList.length > 0) {
         // Determine if the email or its domain is denied
-        const isDenied = link.denyList.some((denied) =>
+        const isDenied = effectiveDenyList.some((denied) =>
           isEmailMatched(email, denied),
         );
 
@@ -393,7 +394,7 @@ export async function POST(request: NextRequest) {
         } else {
           // Check individual membership
           const isMember = group.members.some(
-            (member) => member.viewer.email === email,
+            (member) => member.viewer.email.toLowerCase().trim() === email.toLowerCase().trim(),
           );
 
           // Extract domain from email

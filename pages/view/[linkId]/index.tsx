@@ -440,7 +440,7 @@ export default function ViewPage({
       );
     }
 
-    const {
+    let {
       expiresAt,
       emailProtected,
       emailAuthenticated,
@@ -448,6 +448,15 @@ export default function ViewPage({
       enableAgreement,
       isArchived,
     } = link;
+
+    emailProtected =
+      emailProtected ||
+      link.audienceType === "GROUP" ||
+      (link.allowList && link.allowList.some((e: string) => e && e.trim().length > 0)) ||
+      (link.denyList && link.denyList.some((e: string) => e && e.trim().length > 0)) ||
+      (("visitorGroups" in link) && (link.visitorGroups as any)?.length > 0);
+
+    const processedLink = { ...link, emailProtected } as any;
 
     const { email: userEmail, id: userId } =
       (session?.user as CustomUser) || {};
@@ -478,7 +487,7 @@ export default function ViewPage({
           url={meta.metaUrl ?? ""}
         />
         <DocumentView
-          link={link}
+          link={processedLink}
           userEmail={verifiedEmail ?? storedEmail ?? userEmail}
           userId={userId}
           isProtected={!!(emailProtected || linkPassword || enableAgreement)}
@@ -524,7 +533,7 @@ export default function ViewPage({
       );
     }
 
-    const {
+    let {
       expiresAt,
       emailProtected,
       emailAuthenticated,
@@ -532,6 +541,15 @@ export default function ViewPage({
       enableAgreement,
       isArchived,
     } = link;
+
+    emailProtected =
+      emailProtected ||
+      link.audienceType === "GROUP" ||
+      (link.allowList && link.allowList.some((e: string) => e && e.trim().length > 0)) ||
+      (link.denyList && link.denyList.some((e: string) => e && e.trim().length > 0)) ||
+      (("visitorGroups" in link) && (link.visitorGroups as any)?.length > 0);
+
+    const processedLink = { ...link, emailProtected } as any;
 
     const { email: userEmail, id: userId } =
       (session?.user as CustomUser) || {};
@@ -562,7 +580,7 @@ export default function ViewPage({
           url={meta.metaUrl ?? ""}
         />
         <DataroomView
-          link={link}
+          link={processedLink}
           userEmail={verifiedEmail ?? storedEmail ?? userEmail}
           verifiedEmail={verifiedEmail}
           userId={userId}

@@ -42,16 +42,10 @@ function normalizeIp(ip: string): string {
 export function generateSessionFingerprint(headers: {
   userAgent: string;
   acceptLanguage?: string;
-  secChUa?: string;
-  secChUaPlatform?: string;
-  secChUaMobile?: string;
 }): string {
   const parts = [
     headers.userAgent,
     headers.acceptLanguage ?? "",
-    headers.secChUa ?? "",
-    headers.secChUaPlatform ?? "",
-    headers.secChUaMobile ?? "",
   ];
   return crypto.createHash("sha256").update(parts.join("|")).digest("hex");
 }
@@ -62,9 +56,6 @@ export function collectFingerprintHeaders(h: {
   return {
     userAgent: h.get("user-agent") ?? "unknown",
     acceptLanguage: h.get("accept-language") ?? undefined,
-    secChUa: h.get("sec-ch-ua") ?? undefined,
-    secChUaPlatform: h.get("sec-ch-ua-platform") ?? undefined,
-    secChUaMobile: h.get("sec-ch-ua-mobile") ?? undefined,
   };
 }
 
