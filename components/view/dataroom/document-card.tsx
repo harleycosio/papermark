@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 import React from "react";
 
@@ -77,6 +78,13 @@ export default function DocumentCard({
     slug?: string;
   };
 
+  const targetUrl =
+    domain && slug
+      ? `/${slug}/d/${document.dataroomDocumentId}`
+      : `/view/${linkId}/d/${document.dataroomDocumentId}${
+          previewToken ? `?previewToken=${previewToken}&preview=1` : ""
+        }`;
+
   const handleDocumentClick = (e: React.MouseEvent) => {
     if (isProcessing) {
       e.preventDefault();
@@ -84,19 +92,6 @@ export default function DocumentCard({
         "Document is still processing. Please wait a moment and try again.",
       );
       return;
-    }
-
-    e.preventDefault();
-    // Open in new tab
-    if (domain && slug) {
-      window.open(`/${slug}/d/${document.dataroomDocumentId}`, "_blank");
-    } else {
-      window.open(
-        `/view/${linkId}/d/${document.dataroomDocumentId}${
-          previewToken ? `?previewToken=${previewToken}&preview=1` : ""
-        }`,
-        "_blank",
-      );
     }
   };
 
@@ -205,11 +200,14 @@ export default function DocumentCard({
       }
     >
       {/* Click target - outside of text hierarchy to fix Safari truncation issue */}
-      <button
+      <Link
+        href={targetUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={handleDocumentClick}
         className="absolute inset-0 z-0 cursor-pointer"
-        disabled={isProcessing}
         aria-hidden="true"
+        aria-disabled={isProcessing}
       />
       <div className="flex min-w-0 shrink items-center space-x-2 sm:space-x-4">
         <div className="mx-0.5 flex w-8 items-center justify-center text-center sm:mx-1">
