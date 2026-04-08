@@ -16,6 +16,7 @@ import { sendUpgradeOneMonthCheckinEmailTask } from "@/lib/trigger/send-schedule
 import { log } from "@/lib/utils";
 
 import { getPlanFromPriceId } from "../utils";
+import { sendPaywallReceipt } from "@/lib/emails/send-paywall-receipt";
 
 async function handlePaywallPurchase(checkoutSession: Stripe.Checkout.Session) {
   const linkId = checkoutSession.metadata?.linkId;
@@ -56,6 +57,14 @@ async function handlePaywallPurchase(checkoutSession: Stripe.Checkout.Session) {
       type: "info",
     });
   }
+
+  // Always send the receipt email so they can find the link later, even if they already bought it
+  waitUntil(
+    sendPaywallReceipt({
+      email: customerEmail,
+      linkId: linkId,
+    }),
+  );
 }
 
 export async function checkoutSessionCompleted(
