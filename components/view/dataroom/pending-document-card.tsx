@@ -98,6 +98,7 @@ export default function PendingDocumentCard({
   const { status: triggerStatus } = useDocumentProgressStatus(
     pendingUpload.documentVersionId ?? "",
     tokenData?.publicAccessToken,
+    !!needsTriggerTracking,
   );
 
   // When trigger reports COMPLETED, update the upload status

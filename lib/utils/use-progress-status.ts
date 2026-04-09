@@ -29,11 +29,12 @@ interface IDocumentProgressStatus {
 export function useDocumentProgressStatus(
   documentVersionId: string,
   publicAccessToken: string | undefined,
+  enabled: boolean = true,
 ) {
   const { runs, error } = useRealtimeRunsWithTag(
     `version:${documentVersionId}`,
     {
-      enabled: !!publicAccessToken,
+      enabled: enabled && !!publicAccessToken,
       accessToken: publicAccessToken,
     },
   );
